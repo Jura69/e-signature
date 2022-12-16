@@ -1,0 +1,15 @@
+D:\Electric Signature RSA\e-signature\Electric Signature\Electric Signature\bin\Debug\net6.0\Electric Signature.exe
+D:\Electric Signature RSA\e-signature\Electric Signature\Electric Signature\bin\Debug\net6.0\Electric Signature.deps.json
+D:\Electric Signature RSA\e-signature\Electric Signature\Electric Signature\bin\Debug\net6.0\Electric Signature.runtimeconfig.json
+D:\Electric Signature RSA\e-signature\Electric Signature\Electric Signature\bin\Debug\net6.0\Electric Signature.dll
+D:\Electric Signature RSA\e-signature\Electric Signature\Electric Signature\bin\Debug\net6.0\Electric Signature.pdb
+D:\Electric Signature RSA\e-signature\Electric Signature\Electric Signature\obj\Debug\net6.0\Electric Signature.csproj.AssemblyReference.cache
+D:\Electric Signature RSA\e-signature\Electric Signature\Electric Signature\obj\Debug\net6.0\Electric Signature.GeneratedMSBuildEditorConfig.editorconfig
+D:\Electric Signature RSA\e-signature\Electric Signature\Electric Signature\obj\Debug\net6.0\Electric Signature.AssemblyInfoInputs.cache
+D:\Electric Signature RSA\e-signature\Electric Signature\Electric Signature\obj\Debug\net6.0\Electric Signature.AssemblyInfo.cs
+D:\Electric Signature RSA\e-signature\Electric Signature\Electric Signature\obj\Debug\net6.0\Electric Signature.csproj.CoreCompileInputs.cache
+D:\Electric Signature RSA\e-signature\Electric Signature\Electric Signature\obj\Debug\net6.0\Electric Signature.dll
+D:\Electric Signature RSA\e-signature\Electric Signature\Electric Signature\obj\Debug\net6.0\refint\Electric Signature.dll
+D:\Electric Signature RSA\e-signature\Electric Signature\Electric Signature\obj\Debug\net6.0\Electric Signature.pdb
+D:\Electric Signature RSA\e-signature\Electric Signature\Electric Signature\obj\Debug\net6.0\Electric Signature.genruntimeconfig.cache
+D:\Electric Signature RSA\e-signature\Electric Signature\Electric Signature\obj\Debug\net6.0\ref\Electric Signature.dll
