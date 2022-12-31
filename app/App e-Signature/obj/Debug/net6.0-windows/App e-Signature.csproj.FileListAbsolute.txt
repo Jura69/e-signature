@@ -1,0 +1,17 @@
+D:\Electric Signature RSA\e-signature\app\App e-Signature\bin\Debug\net6.0-windows\App e-Signature.exe
+D:\Electric Signature RSA\e-signature\app\App e-Signature\bin\Debug\net6.0-windows\App e-Signature.deps.json
+D:\Electric Signature RSA\e-signature\app\App e-Signature\bin\Debug\net6.0-windows\App e-Signature.runtimeconfig.json
+D:\Electric Signature RSA\e-signature\app\App e-Signature\bin\Debug\net6.0-windows\App e-Signature.dll
+D:\Electric Signature RSA\e-signature\app\App e-Signature\bin\Debug\net6.0-windows\App e-Signature.pdb
+D:\Electric Signature RSA\e-signature\app\App e-Signature\obj\Debug\net6.0-windows\App e-Signature.csproj.AssemblyReference.cache
+D:\Electric Signature RSA\e-signature\app\App e-Signature\obj\Debug\net6.0-windows\App_e_Signature.Form1.resources
+D:\Electric Signature RSA\e-signature\app\App e-Signature\obj\Debug\net6.0-windows\App e-Signature.csproj.GenerateResource.cache
+D:\Electric Signature RSA\e-signature\app\App e-Signature\obj\Debug\net6.0-windows\App e-Signature.GeneratedMSBuildEditorConfig.editorconfig
+D:\Electric Signature RSA\e-signature\app\App e-Signature\obj\Debug\net6.0-windows\App e-Signature.AssemblyInfoInputs.cache
+D:\Electric Signature RSA\e-signature\app\App e-Signature\obj\Debug\net6.0-windows\App e-Signature.AssemblyInfo.cs
+D:\Electric Signature RSA\e-signature\app\App e-Signature\obj\Debug\net6.0-windows\App e-Signature.csproj.CoreCompileInputs.cache
+D:\Electric Signature RSA\e-signature\app\App e-Signature\obj\Debug\net6.0-windows\App e-Signature.dll
+D:\Electric Signature RSA\e-signature\app\App e-Signature\obj\Debug\net6.0-windows\refint\App e-Signature.dll
+D:\Electric Signature RSA\e-signature\app\App e-Signature\obj\Debug\net6.0-windows\App e-Signature.pdb
+D:\Electric Signature RSA\e-signature\app\App e-Signature\obj\Debug\net6.0-windows\App e-Signature.genruntimeconfig.cache
+D:\Electric Signature RSA\e-signature\app\App e-Signature\obj\Debug\net6.0-windows\ref\App e-Signature.dll
