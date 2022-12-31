@@ -1,233 +1,190 @@
-﻿using System.Text;
+﻿using Security.Cryptography;
+using System;
+using System.Security.Cryptography;
+using System.Text;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Security.Cryptography;
 using System.Xml;
 using System.Xml.Serialization;
+
 namespace Security.Cryptography
 {
-    /// <summary>
-    /// Performs asymmetric encryption and decryption using the implementation of
-    /// the System.Security.Cryptography.RSA algorithm provided by the cryptographic
-    /// service provider (CSP). This class cannot be inherited.
-    /// </summary>
-    public sealed class RSACryptography
+    public class RSA
     {
 
-        #region Private Fields
-
-        private const int KEY_SIZE = 2048; // The size of the RSA key to use in bits.
-        private bool fOAEP = false;
-        private RSACryptoServiceProvider rsaProvider = null;
-
-        #endregion
-
-        #region Constructors
-
-        /// <summary>
-        /// Initializes a new instance of the System.Security.Cryptography.RSACryptoServiceProvider
-        /// class with the predefined key size and parameters.
-        /// </summary>
-        public RSACryptography()
+        int RSA_soP, RSA_soQ, RSA_soN, RSA_soE, RSA_soD, RSA_soPhi_n;
+        public int RSA_d_dau = 0;
+        private int RSA_ChonSoNgauNhien()
         {
+            Random rd = new Random();
+            return rd.Next(101, 1001);
+        }
+        // Hàm kiểm tra nguyên tó
+
+        private bool RSA_kiemTraNguyenTo(int xi)
+        {
+            bool kiemtra = true;
+            if (xi == 2 || xi == 3)
+            {
+                return kiemtra; //kiem tra = true
+            } else
+            {
+                if (xi == 1 || xi % 2 == 0 || xi % 3 == 0)
+                {
+                    kiemtra = false;    
+                } else
+                {
+                    for (int i = 5; i <= Math.Sqrt(xi); i=i+6)
+                    {
+                        if (xi % i == 0 || xi % (i+2) == 0)
+                        {
+                            kiemtra = false;
+                            break;
+                        }
+                    }
+                }
+            }
+            return kiemtra;
         }
 
-        #endregion
-
-        #region Private Methods
-
-        /// <summary>
-        /// Initializes a new instance of the System.Security.Cryptography.CspParameters class.
-        /// </summary>
-        /// <returns>An instance of the System.Security.Cryptography.CspParameters class.</returns>
-        private CspParameters GetCspParameters()
+        // "Hàm kiểm tra hai số nguyên tố cùng nhau"
+        private bool RSA_nguyenToCungNhau(int ai, int bi)
         {
-            // Create a new key pair on target CSP
-            CspParameters cspParams = new CspParameters();
-            cspParams.ProviderType = 1; // PROV_RSA_FULL 
-            // cspParams.ProviderName; // CSP name
-            // cspParams.Flags = CspProviderFlags.UseArchivableKey;
-            cspParams.KeyNumber = (int)KeyNumber.Exchange;
+            bool ktx_;
+            // giải thuật Euclid;
+            int temp;
+            while (bi != 0)
+            {
+                temp = ai % bi;
+                ai = bi;
+                bi = temp;
+            }
+            if (ai == 1) { ktx_ = true; }
+            else ktx_ = false;
+            return ktx_;
+        }
+        // "Hàm lấy mod"
+        public int RSA_mod(int mx, int ex, int nx)
+        {
 
-            return cspParams;
+            //Sử dụng thuật toán "bình phương nhân"
+            //Chuyển e sang hệ nhị phân
+            int[] a = new int[100];
+            int k = 0;
+            do
+            {
+                a[k] = ex % 2;
+                k++;
+                ex = ex / 2;
+            }
+            while (ex != 0);
+            //Quá trình lấy dư
+            int kq = 1;
+            for (int i = k - 1; i >= 0; i--)
+            {
+                kq = (kq * kq) % nx;
+                if (a[i] == 1)
+                    kq = (kq * mx) % nx;
+            }
+            return kq;
+        }
+        public void RSA_taoKhoa()
+        {
+            //Chọn ngẫu nhiên 2 số nguyên tố P và Q
+            do
+            {
+                RSA_soP = RSA_ChonSoNgauNhien();
+                RSA_soQ = RSA_ChonSoNgauNhien();
+            }
+            while (RSA_soP == RSA_soQ || !RSA_kiemTraNguyenTo(RSA_soP) || !RSA_kiemTraNguyenTo(RSA_soQ));
+            //Tinh n=p*q
+            RSA_soN = RSA_soP * RSA_soQ;
+            //Tính Phi(n)=(p-1)*(q-1)
+            RSA_soPhi_n = (RSA_soP - 1) * (RSA_soQ - 1);
+            //Tính e là một số ngẫu nhiên có giá trị 0< e <phi(n) và là số nguyên tố cùng nhau với Phi(n)
+            do
+            {
+                Random RSA_rd = new Random();
+                RSA_soE = RSA_rd.Next(2, RSA_soPhi_n);
+            } while (!RSA_nguyenToCungNhau(RSA_soE, RSA_soPhi_n));
+            //Tính d là nghịch đảo modular của e
+            RSA_soD = 0;
+            int i = 2;
+            while (((1 + i * RSA_soPhi_n) % RSA_soE) != 0 || RSA_soD <= 0)
+            {
+                i++;
+                RSA_soD = (1 + i * RSA_soPhi_n) / RSA_soE;
+            }
+            Console.WriteLine("Public Key (E = {0},N = {1})",RSA_soE,RSA_soN);
+            Console.WriteLine("Private Key (D = {0},N = {1})", RSA_soD, RSA_soN);
+        }
+  
+        public void RSA_maHoa()
+        {
+            string input;
+            Console.WriteLine("Nhap noi dung can ma hoa");
+            input = Console.ReadLine();
+            //chuyen string thanh ma unicode
+            byte[] mh_1 = Encoding.Unicode.GetBytes(input);
+            string base64 = Convert.ToBase64String(mh_1);
+            //chuyen string thanh ma unicode
+            int[] mh_2 = new int[base64.Length];
+            for (int i = 0; i < base64.Length; i++)
+            {
+                mh_2[i] = (int)base64[i];
+            }
+
+            //Mang a chua cac ky tu da ma hoa
+            int[] mh_3 = new int[mh_2.Length];
+            for (int i = 0; i < mh_2.Length; i++)
+            {
+                mh_3[i] = RSA_mod(mh_2[i], RSA_soE, RSA_soN); //ma hoa
+            }
+
+            string str = "";
+            for (int i = 0; i < mh_3.Length; i++)
+            {
+                str = str + (char)mh_3[i];
+            }
+            byte[] data = Encoding.Unicode.GetBytes(str);
+            string strMaHoa = Convert.ToBase64String(data);
+            Console.WriteLine("Chuoi da ma hoa");
+            Console.WriteLine(strMaHoa);
+            
         }
 
-        /// <summary>  
-        /// Gets the maximum data length for a given key  
-        /// </summary>         
-        /// <param name="keySize">The RSA key length  
-        /// <returns>The maximum allowable data length</returns>  
-        public int GetMaxDataLength()
+        public void RSA_giaiMa()
         {
-            if (fOAEP)
-                return ((KEY_SIZE - 384) / 8) + 7;
-            return ((KEY_SIZE - 384) / 8) + 37;
+            string input;
+            Console.WriteLine("Nhap noi dung can giai ma");
+            input = Console.ReadLine();
+            byte[] temp2 = Convert.FromBase64String(input);
+            string giaima = Encoding.Unicode.GetString(temp2);
+
+            int[] b = new int[giaima.Length];
+            for (int i = 0; i < giaima.Length; i++)
+            {
+                b[i] = (int)giaima[i];
+            }
+            //Giải mã
+            int[] c = new int[b.Length];
+            for (int i = 0; i < c.Length; i++)
+            {
+                c[i] = RSA_mod(b[i], RSA_soD, RSA_soN);// giải mã
+            }
+
+            string str = "";
+            for (int i = 0; i < c.Length; i++)
+            {
+                str = str + (char)c[i];
+            }
+            Console.WriteLine("key");
+            Console.WriteLine("Public Key (E = {0},N = {1})", RSA_soE, RSA_soN);
+            Console.WriteLine("Private Key (D = {0},N = {1})", RSA_soD, RSA_soN);
+            Console.WriteLine("Chuoi da giai ma");
+            Console.WriteLine(str);
+
         }
-
-        /// <summary>  
-        /// Checks if the given key size if valid  
-        /// </summary>         
-        /// <param name="keySize">The RSA key length  
-        /// <returns>True if valid; false otherwise</returns>  
-        public static bool IsKeySizeValid()
-        {
-            return KEY_SIZE >= 384 &&
-                   KEY_SIZE <= 16384 &&
-                   KEY_SIZE % 8 == 0;
-        }
-
-        #endregion
-
-        #region Public Methods
-
-        /// <summary>
-        /// Generate a new RSA key pair.
-        /// </summary>
-        /// <param name="publicKey">An XML string containing ONLY THE PUBLIC RSA KEY.</param>
-        /// <param name="privateKey">An XML string containing a PUBLIC AND PRIVATE RSA KEY.</param>
-        public void GenerateKeys(out string publicKey, out string privateKey)
-        {
-            try
-            {
-                CspParameters cspParams = GetCspParameters();
-                cspParams.Flags = CspProviderFlags.UseArchivableKey;
-
-                rsaProvider = new RSACryptoServiceProvider(KEY_SIZE, cspParams);
-
-                // Export public key
-                publicKey = rsaProvider.ToXmlString(false);
-
-                // Export private/public key pair 
-                privateKey = rsaProvider.ToXmlString(true);
-            }
-            catch (Exception ex)
-            {
-                // Any errors? Show them
-                throw new Exception("Exception generating a new RSA key pair! More info: " + ex.Message);
-            }
-            finally
-            {
-                // Do some clean up if needed
-            }
-
-        } // GenerateKeys method
-
-        /// <summary>
-        /// Encrypts data with the System.Security.Cryptography.RSA algorithm.
-        /// </summary>
-        /// <param name="publicKey">An XML string containing the public RSA key.</param>
-        /// <param name="plainText">The data to be encrypted.</param>
-        /// <returns>The encrypted data.</returns>
-        public string Encrypt(string publicKey, string plainText)
-        {
-            if (string.IsNullOrWhiteSpace(plainText))
-                throw new ArgumentException("Data are empty");
-
-            int maxLength = GetMaxDataLength();
-            if (Encoding.Unicode.GetBytes(plainText).Length > maxLength)
-                throw new ArgumentException("Maximum data length is " + maxLength / 2);
-
-            if (!IsKeySizeValid())
-                throw new ArgumentException("Key size is not valid");
-
-            if (string.IsNullOrWhiteSpace(publicKey))
-                throw new ArgumentException("Key is null or empty");
-
-            byte[] plainBytes = null;
-            byte[] encryptedBytes = null;
-            string encryptedText = "";
-
-            try
-            {
-                CspParameters cspParams = GetCspParameters();
-                cspParams.Flags = CspProviderFlags.NoFlags;
-
-                rsaProvider = new RSACryptoServiceProvider(KEY_SIZE, cspParams);
-
-                // [1] Import public key
-                rsaProvider.FromXmlString(publicKey);
-
-                // [2] Get plain bytes from plain text
-                plainBytes = Encoding.Unicode.GetBytes(plainText);
-
-                // Encrypt plain bytes
-                encryptedBytes = rsaProvider.Encrypt(plainBytes, false);
-
-                // Get encrypted text from encrypted bytes
-                // encryptedText = Encoding.Unicode.GetString(encryptedBytes); => NOT WORKING
-                encryptedText = Convert.ToBase64String(encryptedBytes);
-            }
-            catch (Exception ex)
-            {
-                // Any errors? Show them
-                throw new Exception("Exception encrypting file! More info: " + ex.Message);
-            }
-            finally
-            {
-                // Do some clean up if needed
-            }
-
-            return encryptedText;
-
-        } // Encrypt method
-
-        /// <summary>
-        /// Decrypts data with the System.Security.Cryptography.RSA algorithm.
-        /// </summary>
-        /// <param name="privateKey">An XML string containing a public and private RSA key.</param>
-        /// <param name="encryptedText">The data to be decrypted.</param>
-        /// <returns>The decrypted data, which is the original plain text before encryption.</returns>
-        public string Decrypt(string privateKey, string encryptedText)
-        {
-            if (string.IsNullOrWhiteSpace(encryptedText))
-                throw new ArgumentException("Data are empty");
-
-            if (!IsKeySizeValid())
-                throw new ArgumentException("Key size is not valid");
-
-            if (string.IsNullOrWhiteSpace(privateKey))
-                throw new ArgumentException("Key is null or empty");
-
-            byte[] encryptedBytes = null;
-            byte[] plainBytes = null;
-            string plainText = "";
-
-            try
-            {
-                CspParameters cspParams = GetCspParameters();
-                cspParams.Flags = CspProviderFlags.NoFlags;
-
-                rsaProvider = new RSACryptoServiceProvider(KEY_SIZE, cspParams);
-
-                // [1] Import private/public key pair
-                rsaProvider.FromXmlString(privateKey);
-
-                // [2] Get encrypted bytes from encrypted text
-                // encryptedBytes = Encoding.Unicode.GetBytes(encryptedText); => NOT WORKING
-                encryptedBytes = Convert.FromBase64String(encryptedText);
-
-                // Decrypt encrypted bytes
-                plainBytes = rsaProvider.Decrypt(encryptedBytes, false);
-
-                // Get decrypted text from decrypted bytes
-                plainText = Encoding.Unicode.GetString(plainBytes);
-            }
-            catch (Exception ex)
-            {
-                // Any errors? Show them
-                throw new Exception("Exception decrypting file! More info: " + ex.Message);
-            }
-            finally
-            {
-                // Do some clean up if needed
-            }
-
-            return plainText;
-
-        } // Decrypt method
-
-        #endregion
-
     }
 }

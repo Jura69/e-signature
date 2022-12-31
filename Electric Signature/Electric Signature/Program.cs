@@ -5,9 +5,9 @@ using System.Text;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Security.Cryptography;
 using System.Xml;
 using System.Xml.Serialization;
+using System.Net.Security;
 
 namespace Security.Cryptography
 {
@@ -33,39 +33,22 @@ namespace Security.Cryptography
         }
         static void Main(string[] args)
         {
-            RSACryptography RSA = new RSACryptography();
-            string publicKey, privateKey;
+            Console.OutputEncoding = Encoding.Unicode;
 
-            // Generate RSA key pair
-            RSA.GenerateKeys(out publicKey, out privateKey);
+           
 
-            string plainText = Console.ReadLine();// Guid.NewGuid().ToString();
+            RSA Test = new RSA();
+            Test.RSA_taoKhoa();
+            Test.RSA_maHoa();
+            Test.RSA_giaiMa();
+            ////test sha256
+            //string plaindata = "test hash";
+            //console.writeline("raw data: {0}", plaindata);
+            //string hasheddata = computesha256hash(plaindata);
+            //console.writeline("hash {0}", hasheddata);
+            //console.writeline(computesha256hash("mahesh"));
 
-            // Encrypt
-            string encryptedText = RSA.Encrypt(publicKey, plainText);
 
-            // Decrypt
-            string decryptedText = RSA.Decrypt(privateKey, encryptedText);
-
-            string file = publicKey;
-
-            //test RSA
-            Console.WriteLine(plainText);
-            Console.WriteLine("PublicKey");
-            Console.WriteLine(publicKey);
-            Console.WriteLine("PrivateKey");
-            Console.WriteLine(privateKey);
-            Console.WriteLine("encryptedText");
-            Console.WriteLine(encryptedText);
-            Console.WriteLine("decrytedText");
-            Console.WriteLine(decryptedText);
-
-            //test SHA256
-            string plainData = "Mahesh";
-            Console.WriteLine("Raw data: {0}", plainData);
-            string hashedData = ComputeSha256Hash(plainData);
-            Console.WriteLine("Hash {0}", hashedData);
-            Console.WriteLine(ComputeSha256Hash("Mahesh"));
 
             Console.ReadKey();
         }
