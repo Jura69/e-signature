@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Serialization;
 using System.Net.Security;
+using System.IO;
+using System.Text;
+
 
 namespace App_e_Signature
 {
@@ -15,7 +18,25 @@ namespace App_e_Signature
         {
             InitializeComponent();
         }
-        #region RSA
+
+        static string ComputeSha256Hash(string rawData)
+        {
+            // Create a SHA256   
+            using (SHA256 sha256Hash = SHA256.Create())
+            {
+                // ComputeHash - returns byte array  
+                byte[] bytes = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(rawData));
+
+                // Convert byte array to a string   
+                StringBuilder builder = new StringBuilder();
+                for (int i = 0; i < bytes.Length; i++)
+                {
+                    builder.Append(bytes[i].ToString("x2"));
+                }
+                return builder.ToString();
+            }
+        }
+
 
         int RSA_soP, RSA_soQ, RSA_soN, RSA_soE, RSA_soD, RSA_soPhi_n;
         public int RSA_d_dau = 0;
@@ -24,6 +45,68 @@ namespace App_e_Signature
             Random rd = new Random();
             return rd.Next(11, 101);
         }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog file = new OpenFileDialog();
+            if (file.ShowDialog() == DialogResult.OK)
+            {
+                textBox1.Text = file.FileName;
+            }
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            string plaintext = File.ReadAllText(textBox1.Text);
+            
+            RSA_soP = RSA_soQ = 0;
+            do
+            {
+                RSA_soP = RSA_ChonSoNgauNhien();
+                RSA_soQ = RSA_ChonSoNgauNhien();
+            }
+            while (RSA_soP == RSA_soQ || !RSA_kiemTraNguyenTo(RSA_soP) || !RSA_kiemTraNguyenTo(RSA_soQ));
+            RSA_taoKhoa();
+            string chuoivao = ComputeSha256Hash(plaintext);
+            byte[] mh_temp1 = Encoding.Unicode.GetBytes(chuoivao);
+            string base64 = Convert.ToBase64String(mh_temp1);
+
+            // Chuyen xau thanh ma Unicode
+            int[] mh_temp2 = new int[base64.Length];
+            for (int i = 0; i < base64.Length; i++)
+            {
+                mh_temp2[i] = (int)base64[i];
+            }
+
+            //Mảng a chứa các kí tự đã mã hóa
+            int[] mh_temp3 = new int[mh_temp2.Length];
+            for (int i = 0; i < mh_temp2.Length; i++)
+            {
+                mh_temp3[i] = RSA_mod(mh_temp2[i], RSA_soD, RSA_soN); // mã hóa
+            }
+
+            //Chuyển sang kiểu kí tự trong bảng mã Unicode
+            string str = "";
+            for (int i = 0; i < mh_temp3.Length; i++)
+            {
+                str = str + (char)mh_temp3[i];
+            }
+
+
+            using (StreamWriter writer = File.CreateText("D:/FileMaHoa/File.txt"))
+            {
+                writer.WriteLineAsync(ComputeSha256Hash(plaintext));
+                writer.WriteLineAsync(str);
+            }
+            
+            textBox4.Text =  Convert.ToString(RSA_soN);
+        }
+      
         private bool RSA_kiemTraNguyenTo(int xi)
         {
             bool kiemtra = true;
@@ -50,6 +133,16 @@ namespace App_e_Signature
             }
             return kiemtra;
         }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog file = new OpenFileDialog();
+            if (file.ShowDialog() == DialogResult.OK)
+            {
+                textBox2.Text = file.FileName;
+            }
+        }
+
         // "Hàm kiểm tra hai số nguyên tố cùng nhau"
         private bool RSA_nguyenToCungNhau(int ai, int bi)
         {
@@ -66,7 +159,7 @@ namespace App_e_Signature
             else ktx_ = false;
             return ktx_;
         }
-        public int RSA_mod(int mx, int ex, int nx)
+        private int RSA_mod(int mx, int ex, int nx)
         {
 
             //Sử dụng thuật toán "bình phương nhân"
@@ -95,18 +188,17 @@ namespace App_e_Signature
         {
             //Tinh n=p*q
             RSA_soN = RSA_soP * RSA_soQ;
-            rsa_soN.Text = RSA_soN.ToString();
+
             //Tính Phi(n)=(p-1)*(q-1)
             RSA_soPhi_n = (RSA_soP - 1) * (RSA_soQ - 1);
-            rsa_soPhiN.Text = RSA_soPhi_n.ToString();
             //Tính e là một số ngẫu nhiên có giá trị 0< e <phi(n) và là số nguyên tố cùng nhau với Phi(n)
             do
             {
                 Random RSA_rd = new Random();
                 RSA_soE = RSA_rd.Next(2, RSA_soPhi_n);
             }
-            while (!nguyenToCungNhau(RSA_soE, RSA_soPhi_n));
-            rsa_soE.Text = RSA_soE.ToString();
+            while (!RSA_nguyenToCungNhau(RSA_soE, RSA_soPhi_n));
+
 
             //Tính d là nghịch đảo modular của e
             RSA_soD = 0;
@@ -116,44 +208,64 @@ namespace App_e_Signature
                 i++;
                 RSA_soD = (1 + i * RSA_soPhi_n) / RSA_soE;
             }
-            rsa_soD.Text = RSA_soD.ToString();
         }
-        #endregion
-
-        private void textBox1_TextChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void label1_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void label3_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void button6_Click(object sender, EventArgs e)
-        {
-    
-        }
-
-        private void button2_Click(object sender, EventArgs e)
-        {
-            string plaintext = File.ReadAllText(textBox1.Text);
-
-
-        }
-   
-        private void button1_Click(object sender, EventArgs e)
-        {
-            OpenFileDialog file = new OpenFileDialog();
-            if (file.ShowDialog() == DialogResult.OK)
+            public void RSA_MaHoa(string chuoivao)
             {
-                textBox1.Text = file.FileName;
+                // taoKhoa();
+                // Chuyen xau thanh ma Unicode
+                byte[] mh_temp1 = Encoding.Unicode.GetBytes(chuoivao);
+                string base64 = Convert.ToBase64String(mh_temp1);
+
+                // Chuyen xau thanh ma Unicode
+                int[] mh_temp2 = new int[base64.Length];
+                for (int i = 0; i < base64.Length; i++)
+                {
+                    mh_temp2[i] = (int)base64[i];
+                }
+
+                //Mảng a chứa các kí tự đã mã hóa
+                int[] mh_temp3 = new int[mh_temp2.Length];
+                for (int i = 0; i < mh_temp2.Length; i++)
+                {
+                    mh_temp3[i] = RSA_mod(mh_temp2[i], RSA_soD, RSA_soN); // mã hóa
+                }
+
+                //Chuyển sang kiểu kí tự trong bảng mã Unicode
+                string str = "";
+                for (int i = 0; i < mh_temp3.Length; i++)
+                {
+                    str = str + (char)mh_temp3[i];
+                }
+                byte[] CF_text = Encoding.Unicode.GetBytes(str);
             }
+        public void RSA_GiaiMa(string ChuoiVao)
+        {
+            byte[] temp2 = Convert.FromBase64String(ChuoiVao);
+            string giaima = Encoding.Unicode.GetString(temp2);
+
+            int[] b = new int[giaima.Length];
+            for (int i = 0; i < giaima.Length; i++)
+            {
+                b[i] = (int)giaima[i];
+            }
+            //Giải mã
+            int[] c = new int[b.Length];
+            for (int i = 0; i < c.Length; i++)
+            {
+                c[i] = RSA_mod(b[i], RSA_soE, RSA_soN);// giải mã
+            }
+
+            string str = "";
+            for (int i = 0; i < c.Length; i++)
+            {
+                str = str + (char)c[i];
+            }
+            byte[] data2 = Convert.FromBase64String(str);
+
         }
     }
+        
+        
+
+     
 }
