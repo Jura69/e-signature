@@ -278,7 +278,7 @@ namespace App_e_Signature
         {
             string Send_file = File.ReadAllText(textBox5.Text);
             string Hash_Send = Send_file.Substring(0, 64);
-            string MH = Send_file.Substring(65);
+            string MaHoa = Send_file.Substring(65);
    
             string PublicKey = File.ReadAllText(textBox3.Text);
             string s = PublicKey;
@@ -299,7 +299,8 @@ namespace App_e_Signature
             Int32.TryParse(E, out int RSA_soE);
             Int32.TryParse(N, out int RSA_soN);
 
-            byte[] temp2 = Convert.FromBase64String(MH);
+            String ChuoiVao = MaHoa;
+            byte[] temp2 = Convert.FromBase64String(ChuoiVao);
             string giaima = Encoding.Unicode.GetString(temp2);
 
             int[] b = new int[giaima.Length];
@@ -311,7 +312,7 @@ namespace App_e_Signature
             int[] t = new int[b.Length];
             for (int i = 0; i < t.Length; i++)
             {
-                t[i] = RSA_mod(b[i], RSA_soE, RSA_soN);// giải mã
+                t[i] = RSA_mod(b[i], RSA_soD, RSA_soN);// giải mã
             }
 
             string str = "";
