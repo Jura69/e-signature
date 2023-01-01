@@ -8,6 +8,7 @@ using System.Xml.Serialization;
 using System.Net.Security;
 using System.IO;
 using System.Text;
+using static System.Net.Mime.MediaTypeNames;
 
 
 namespace App_e_Signature
@@ -151,10 +152,8 @@ namespace App_e_Signature
             }
         }
 
-        private void button2_Click(object sender, EventArgs e)
+        private void button7_Click(object sender, EventArgs e)
         {
-            string plaintext = File.ReadAllText(textBox1.Text);
-            
             RSA_soP = RSA_soQ = 0;
             do
             {
@@ -163,6 +162,63 @@ namespace App_e_Signature
             }
             while (RSA_soP == RSA_soQ || !RSA_kiemTraNguyenTo(RSA_soP) || !RSA_kiemTraNguyenTo(RSA_soQ));
             RSA_taoKhoa();
+            String E = Convert.ToString(RSA_soE);
+            String N = Convert.ToString(RSA_soN);
+            String D = Convert.ToString(RSA_soD);
+            using (StreamWriter writer = File.CreateText("D:/Key/PublicKey.txt"))
+            {
+                writer.WriteAsync(N);
+                writer.WriteAsync(",");
+                writer.WriteAsync(E);
+            }
+            using (StreamWriter writer = File.CreateText("D:/Key/PrivateKey.txt"))
+            {
+                writer.WriteAsync(N);
+                writer.WriteAsync(",");
+                writer.WriteAsync(D);
+            }
+        }
+
+        private void button6_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog file = new OpenFileDialog();
+            if (file.ShowDialog() == DialogResult.OK)
+            {
+                textBox4.Text = file.FileName;
+            }
+        }
+
+        private void button8_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog file = new OpenFileDialog();
+            if (file.ShowDialog() == DialogResult.OK)
+            {
+                textBox3.Text = file.FileName;
+            }
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            string PrivateKey = File.ReadAllText(textBox4.Text);
+            string s = PrivateKey;
+            char c = char.Parse(",");
+            int answer = -1;
+            for (int i = 0; i < s.Length; i++)
+            {
+                if (s[i] == c)
+                {
+                    answer = i;
+                    break;
+                }
+            }
+            int temp = answer;
+            string D = s.Substring(0, temp);
+            string N = s.Substring(temp+1);
+
+            Int32.TryParse(D, out int RSA_soD);
+            Int32.TryParse(N, out int RSA_soN);
+
+            string plaintext = File.ReadAllText(textBox1.Text);
             string chuoivao = ComputeSha256Hash(plaintext);
             byte[] mh_temp1 = Encoding.Unicode.GetBytes(chuoivao);
             string base64 = Convert.ToBase64String(mh_temp1);
@@ -189,20 +245,13 @@ namespace App_e_Signature
             }
             byte[] data = Encoding.Unicode.GetBytes(str);
             string a = Convert.ToBase64String(data);
-
+ 
             using (StreamWriter writer = File.CreateText("D:/FileMaHoa/FileMaHoa.txt"))
             {
-                writer.WriteLineAsync(ComputeSha256Hash(plaintext));
-                writer.WriteLineAsync(a);
+                writer.WriteAsync(ComputeSha256Hash(plaintext));
+                writer.WriteAsync(a);
             }
-            using (StreamWriter writer = File.CreateText("D:/Key/PublicKey.txt"))
-            {
-                String E = Convert.ToString(RSA_soE);
-                String N = Convert.ToString(RSA_soN);
-                writer.WriteAsync(N);
-                writer.WriteAsync(",");
-                writer.WriteAsync(E);
-            }
+
         }
       
 
@@ -230,39 +279,28 @@ namespace App_e_Signature
             string Send_file = File.ReadAllText(textBox5.Text);
             string Hash_Send = Send_file.Substring(0, 64);
             string MH = Send_file.Substring(65);
+   
+            string PublicKey = File.ReadAllText(textBox3.Text);
+            string s = PublicKey;
+            char c = char.Parse(",");
+            int answer = -1;
+            for (int i = 0; i < s.Length; i++)
+            {
+                if (s[i] == c)
+                {
+                    answer = i;
+                    break;}
+            }
 
-            string text = textBox3.Text;
+            int temp = answer;
+            string E = s.Substring(0, temp);
+            string N = s.Substring(temp + 1);
+
+            Int32.TryParse(E, out int RSA_soE);
+            Int32.TryParse(N, out int RSA_soN);
 
             byte[] temp2 = Convert.FromBase64String(MH);
             string giaima = Encoding.Unicode.GetString(temp2);
-            int[] b = new int[giaima.Length];
-            for (int i = 0; i < giaima.Length; i++)
-            {
-                b[i] = (int)giaima[i];
-            }
-            //Giải mã
-            int[] c = new int[b.Length];
-            for (int i = 0; i < c.Length; i++)
-            {
-                c[i] = RSA_mod(b[i], RSA_soD, RSA_soN);// giải mã
-            }
-
-            string str = "";
-            for (int i = 0; i < c.Length; i++)
-            {
-                str = str + (char)c[i];
-            }
-            byte[] data2 = Convert.FromBase64String(str);
-
-
-        }
-
-       
-           
-        public void RSA_GiaiMa(string ChuoiVao)
-        {
-            byte[] temp2 = Convert.FromBase64String(ChuoiVao);
-            string giaima = Encoding.Unicode.GetString(temp2);
 
             int[] b = new int[giaima.Length];
             for (int i = 0; i < giaima.Length; i++)
@@ -270,20 +308,21 @@ namespace App_e_Signature
                 b[i] = (int)giaima[i];
             }
             //Giải mã
-            int[] c = new int[b.Length];
-            for (int i = 0; i < c.Length; i++)
+            int[] t = new int[b.Length];
+            for (int i = 0; i < t.Length; i++)
             {
-                c[i] = RSA_mod(b[i], RSA_soE, RSA_soN);// giải mã
+                t[i] = RSA_mod(b[i], RSA_soE, RSA_soN);// giải mã
             }
 
             string str = "";
-            for (int i = 0; i < c.Length; i++)
+            for (int i = 0; i < t.Length; i++)
             {
-                str = str + (char)c[i];
+                str = str + (char)t[i];
             }
             byte[] data2 = Convert.FromBase64String(str);
-
-        }
+            string Hash_re = Encoding.Unicode.GetString(data2);
+            textBox6.Text = Hash_re;
+        }              
     }
         
         
